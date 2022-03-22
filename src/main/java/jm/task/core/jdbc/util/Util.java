@@ -1,8 +1,16 @@
 package jm.task.core.jdbc.util;
 
+import jm.task.core.jdbc.model.User;
+import org.hibernate.SessionFactory;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.cfg.Environment;
+import org.hibernate.service.ServiceRegistry;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 public class Util {
     // реализуйте настройку соеденения с БД
@@ -10,31 +18,56 @@ public class Util {
     private static final String HOST = "jdbc:mysql://localhost:3306/db";
     private static final String LOGIN = "root";
     private static final String PASSWORD = "Abashka2016";
-    private static Connection connection=null;
+    private static Connection connection;
+    private static SessionFactory sessionFactory;
+
+    public Util() {
+        try {
+            connection = DriverManager.getConnection(HOST, LOGIN, PASSWORD);
+        } catch (SQLException e) {
+            System.out.println("Соединение не удалось.");
+            e.printStackTrace();
+        }
+    }
+
+    public static SessionFactory getSessionFactory() {
+        if (sessionFactory == null) {
+            try {
+                Configuration configuration = new Configuration();
+                Properties properties = new Properties();
+
+                properties.put(Environment.DRIVER, DRIVER);
+                properties.put(Environment.URL, HOST);
+                properties.put(Environment.USER, LOGIN);
+                properties.put(Environment.PASS, PASSWORD);
+                properties.put(Environment.DIALECT, "org.hibernate.dialect.MySQL5Dialect");
+                properties.put(Environment.SHOW_SQL, "true");
+                properties.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");
+
+                configuration.setProperties(properties);
+                configuration.addAnnotatedClass(User.class);
+
+                ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
+                        .applySettings(configuration.getProperties()).build();
+                sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+            } catch (Exception e) {
+                System.out.println("Ошибка!");
+                e.printStackTrace();
+            }
+        }
+        return sessionFactory;
+    }
 
     public static Connection getConnection() {
-        try {
-            Class.forName(DRIVER);
-            connection = DriverManager.getConnection(HOST, LOGIN, PASSWORD);
-            if(!connection.isClosed()){
-                System.out.println("Соединение с БД установлено.");
-            }
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
-            System.err.println("Не удалось загрузить класс драйвера!");
-        }
         return connection;
     }
 
     public static void closeConnection() {
         try {
-            if (connection != null) {
-                connection.close();
-                System.out.println("Подключение к БД закрыто");
-            }
+            connection.close();
         } catch (SQLException e) {
+            System.out.println("Нипалучилас");
             e.printStackTrace();
-            System.out.println("Не удалось закрыть подключение");
         }
     }
 }
