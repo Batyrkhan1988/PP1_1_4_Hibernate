@@ -7,6 +7,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.HibernateException;
 import org.hibernate.query.Query;
+
 import javax.persistence.criteria.CriteriaQuery;
 import java.util.List;
 
@@ -80,7 +81,7 @@ public class UserDaoHibernateImpl implements UserDao {
         Transaction transaction = null;
         try (session) {
             transaction = session.beginTransaction();
-            session.createQuery("DELETE FROM User WHERE id = id").executeUpdate();
+            session.delete(session.get(User.class, id));
             transaction.commit();
         } catch (HibernateException e) {
             e.printStackTrace();

@@ -50,6 +50,7 @@ public class Util {
                 ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
                         .applySettings(configuration.getProperties()).build();
                 sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+                System.out.println("Есть контакт.");
             } catch (Exception e) {
                 System.out.println("Ошибка!");
                 e.printStackTrace();
@@ -66,7 +67,14 @@ public class Util {
         try {
             connection.close();
         } catch (SQLException e) {
-            System.out.println("Нипалучилас");
+            e.printStackTrace();
+        }
+    }
+    public static void closeSessionFactory() {
+        try {
+            sessionFactory.close();
+            System.out.println("Нет контакта.");
+        } catch (Exception e){
             e.printStackTrace();
         }
     }
